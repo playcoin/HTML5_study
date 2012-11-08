@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>HTML5 Web Workers</title>
+</head>
+<body>
+	<h1>HTML5 Web Workers</h1>
+
+	<p id="status">您的浏览器支持HTML5 Web Workers</p>
+
+	<button id="startBlurButton">Blur</button>
+	<button id="stopButton">Stop</button>
+	<button id="reloadButton" onclick="location.reload();">Reload</button>
+
+	<label for="workerCount">Number of Workers</label>
+
+	<select id="workerCount">
+		<option value="1">1</option>
+		<option value="2" selected>2</option>
+		<option value="3">3</option>
+		<option value="4">4</option>
+	</select>
+
+	<div id="imageContainer">
+		<canvas id="canvas"></canvas>
+	</div>
+	<div id="logOutPut"></div>
+
+	<script>
+		// 初始化图像，构建worker，添加事件响应函数
+		var image = new Image();
+		var canvas = document.getElementById("canvas");
+		var ctx = canvas.getContext("2d");
+		var workers = [];
+
+		// 控制信息输出
+		function log(s){
+			document.getElementById("logOutPut").innerHTML = s + "<br />";
+		}
+
+		// 设置按钮的状态
+		function setRunningState(p){
+			document.getElementById("startBlurButton").disabled = p;
+			document.getElementById("stopButton").disabled = !p;
+		}
+
+		// 初始化一个worker
+		function initWorker(src){
+			var worker = new Worker(src);
+
+			worker.addEventListener("message", messageHandler, true);
+			worker.addEventListener("error", errorHandler, true);
+			return worker;
+		}
+
+		// 发送图片信息事件
+		function sendBlurTask(worker, i, chunkWidth){
+			var chunkHeight = image.height;
+			var chunkStartX = i * chunkWidth;
+			var chunkStartY = 0;
+			var data = ctx.getImageData(chunkStartX, chunkStartY, chunkWidth, chunkHeight).data;
+
+			worker.postMessage({
+				type : "blur",
+				"imageData" : data,
+				"width" : chunkWidth,
+				"height" : chunkHeight,
+				"startX" : chunkStartX
+			});
+		}
+
+		// 为按钮添加事件响应
+		function startBlur(){
+			var workerCount = parseInt(document.getElementById("workerCount").value);
+			var width = Math.floor(image.width / workerCount);
+
+			for(var i = 0; i < workerCount; i++){
+				var worker = initWorker("blurWorker.js");
+				worker.index = i;
+				worker.width = width;
+				workers[i] = worker;
+
+				sendBlurTask(worker, i, width);
+			}
+			setRunningState(true);
+		}
+
+		// 停止blur
+		function stopBlur(){
+			for(var i = 0; i < workers.length; i++){
+				workers[i].terminate();
+			}
+			setRunningState(false);
+		}
+
+		// 从worker那拿到消息后的处理操作
+		function messageHandler(e){
+			var messageType = e.data.type;
+
+			switch(messageType) {
+			case "status" :
+				log(e.data.statusText);
+				break;
+			case "progress":
+				// 获取图片数据
+				var imageData = ctx.createImageData(e.data.width, e.data.height);
+				// 设置canvas的内容
+				for(var i = 0; i < imageData.data.length; i++){
+					var val = e.data.imageData[i];
+
+					if(val == null || val > 255 || val < 0){
+						log("illegal value: " + val + " at " + i);
+						return;
+					}
+
+					imageData.data[i] = val;
+				}
+				ctx.putImageData(imageData, e.data.startX, 0);
+
+				if(e.origin){
+					AA = 1;
+				}
+				// 继续模糊，e.target是当前得worker
+				sendBlurTask(e.target, e.target.index, e.target.width);
+				break;
+			default:
+				break;
+			}
+		}
+
+		function errorHandler(e){
+			log("error: " + e.message);
+		}
+
+		function loadImageData(){
+			image.src = "8.jpg";
+
+			image.onload = function(){
+				canvas.width = image.width;
+				canvas.height = image.height;
+				ctx.drawImage(image, 0, 0);
+				window.imgdata = ctx.getImageData(0, 0, image.width, image.height);
+				// 这是在干什么啊？
+				n = ctx.createImageData(image.width, image.height);
+				log("Image loaded: " + image.width + "x" + image.height + " pixels");
+			}
+		}
+
+		function loadDemo(){
+			log("loading image data");
+
+			document.getElementById("startBlurButton").onclick = startBlur;
+			document.getElementById("stopButton").onclick = stopBlur;
+
+			loadImageData();
+
+			setRunningState(false);
+		}
+		window.addEventListener("load", loadDemo, true);
+
+	</script>
+
+</body>
+</html>

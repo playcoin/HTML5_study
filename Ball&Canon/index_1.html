@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>The First APP</title>
+
+</head>
+<body onload="init()">
+	<canvas id="canvas" width="1000" height="350"></canvas>
+	<br />
+	<form name="f" id="f" onsubmit="return fire();">
+		Set velocities and fire cannonball.<br>
+		Horizontal displacement <input name="hv" id="hv" value="10" type="number" min="-100" max="100"> Vertical displacement <input name="vv" id="vv" value="-25" type="number" min="-100" max="100"> <input type="submit" value="FIRE">
+	</form>
+
+	<script src="js/script.js"></script>
+	
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<span id="status1" style="background-color:#09f">0</span></p>
+	<script type="text/javascript">
+        var status = document.getElementById('status1');
+        if(window.Worker){
+            var worker = new Worker('worker2.js');
+
+			worker.postMessage("John");
+
+            worker.onmessage = function(e){
+                status.textContent = e.data;
+            }
+        }
+        else{
+            alert("Not Support Web Worker")
+        }
+	</script>
+</body>
+</html>

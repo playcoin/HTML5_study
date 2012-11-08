@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"></meta>
+	<title> </title>
+</head>
+<body>
+	<script>
+		function loadDemo(){
+			var dataElement = document.getElementById("geodata");
+			dataElement.textContent = JSON.stringify(geoData).replace(",", ", ", "g");
+
+			var xhr = new XMLHttpRequest();
+			if(typeof xhr.withCredentials === undefined){
+				alert("No cross-origin XMLHttpRequest");
+				return;
+			}
+
+			// 先试试同源的
+			var targetLocation = "http://geodata.example.com/php_workspace/php_sandbox/";
+
+			function setProgress(s){
+				document.getElementById("progress").innerHTML = s;
+			}
+
+			document.getElementById("sendButton").addEventListener("click",
+				function(){
+					xhr.upload.onprogress = function(e) {
+						var ratio = 100 * e.loaded / e.total;
+						setProgress(ratio + "% uploaded");
+					}
+
+					xhr.onprogress = function(e) {
+						var ratio = 100 * e.loaded / e.total;
+						setProgress(ratio + "% downloaded");
+					}
+
+					xhr.onload = function(e){
+						setProgress("finished");
+					}
+
+					xhr.onerror = function (e){
+						setProgress("error");
+					}
+
+					xhr.open("POST", targetLocation, true);
+
+					geoDataString = dataElement.textContent;
+
+					xhr.send(geoDataString);
+				}, true
+			)
+		}
+
+		window.addEventListener("load", loadDemo, true);
+	</script>
+
+	<h1>XMLHttpRequest Level 2</h1>
+
+	<h4>Geolocation Data to upload:</h4>
+	<textarea id="geodata"></textarea>
+	<br/>
+
+	<button id="sendButton">Upload</button>
+
+	<script>
+		var geoData = [];
+		var data = [];
+		for(var i = 0; i < 10000; i ++){
+		    data[i] = Math.random() * 100;
+		}
+		geoData.push(data);
+	</script>
+
+	<p>
+		<b>Status: </b> <span id="progress">ready</span>
+
+	</p>
+</body>
+</html>

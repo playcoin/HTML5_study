@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<!--
+ * Created on 2012-9-13
+-->
+<head>
+<meta charset="utf-8">
+<title></title>
+</head>
+<body>
+<p>Welcome HTML5 Worker Test</p>
+<button id="bt_send">post message</button>
+
+<script type="text/javascript">
+    var status = document.getElementById('status');
+	var count = 1;
+
+	var worker = window.Worker ? new Worker('worker2.js') : null;
+
+	function sendMessage(){
+		if(worker){
+			worker.postMessage("send the " + count++ + "th message to worker");
+		}
+	}
+
+	function receivedMessage(event){
+		console.log(event.data);
+	}
+
+	var bt_send = document.getElementById('bt_send');
+	bt_send.addEventListener("click", sendMessage, true);
+
+	worker.addEventListener("message", receivedMessage, true);
+
+	// 错误处理
+	function errorHandler(e){
+		worker.terminate();
+		alert(e.message);
+	}
+	worker.addEventListener("error", errorHandler, true);
+
+</script>
+
+<!-- <iframe src="inner.html"></iframe> -->
+
+</body>
+</html>
+
