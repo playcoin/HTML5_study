@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Supercharged Charpter 3</title>
+	<style>
+		body {
+			padding: 0;
+			margin: 0;
+		}
+
+		@keyframes myAnim {
+			from {background-position: 256px 0;}
+			to {background-position: 0 0;}
+		}
+
+		@-webkit-keyframes myAnim {
+			from {background-position: 256px 0;}
+			to {background-position: 0px 0;}
+		}
+		.layer {
+			position: absolute;
+			width: 100%;
+			height: 256px;
+			animation: myAnim 4s infinite linear;
+			-webkit-animation: myAnim 4s infinite linear;
+		}
+		#back {
+			background: url('back1.png') 0 0 #3BB9FF;
+		}
+		#middle {
+			background: url('back2.png') 0 0 transparent;
+			animation-duration: 3s;
+			-webkit-animation-duration: 3s;
+		}
+		#front {
+			background: url('back3.png') 256px 0 transparent;
+			animation-duration: 2s;
+			-webkit-animation-duration: 2s;
+		}
+
+/*		#front:hover {
+			background-position: 10% 0;
+		}*/
+	</style>
+	<script type="text/javascript" src="../lib/jquery-1.6.1.js"></script>
+</head>
+<body>
+	<div id="back" class="layer"></div>
+	<div id="middle" class="layer"></div>
+	<div id="front" class="layer"></div>
+	<script>
+		var halfWidth = $(window).width() / 2;
+		var $layers = $('.layer');
+
+		$(document).mousemove(function(e){
+			$layers.css('animation-direction', (e.pageX > halfWidth ? 'reverse' : 'normal'))
+		})
+	</script>
+</body>
+</html>
