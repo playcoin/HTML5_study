@@ -12,6 +12,7 @@
 		;(function($) {
 			var loadImage = function($image, src, callback) {
 				$image.bind("load", function(evt) {
+					// image has loaded, so unbind event and call callback
 					$image.unbind("load");
 					callback($image);
 
